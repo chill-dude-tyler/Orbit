@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Screen Map — Orbit App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EFF5F5;
+    --ink:#0E2A2E;
+    --teal:#1C6E76;
+    --teal-deep:#0F4A50;
+    --sky:#5FA8B0;
+    --blue:#2D5F8A;
+    --coral:#E8734A;
+    --gold:#D9A441;
+    --green:#4C9A6A;
+    --card:#FFFFFF;
+    --line:#D7E4E4;
+    --muted:#5B7B7E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 8% 0%, #DCEBEC 0%, transparent 45%),
+      var(--bg);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    padding:36px 28px 80px;
+  }
+  header{
+    max-width:1400px;
+    margin:0 auto 32px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--teal-deep);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:16px;height:2px;background:var(--coral);display:inline-block;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(28px,4vw,42px);
+    margin:10px 0 6px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    color:var(--muted);
+    font-size:14px;
+    max-width:640px;
+    line-height:1.5;
+    margin:0;
+  }
+  .grid{
+    max-width:1400px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:34px 26px;
+  }
+  .slot{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .slot-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:10px;
+    text-align:center;
+    line-height:1.4;
+  }
+  .slot-label b{
+    color:var(--ink);
+    font-family:'Space Grotesk',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    display:block;
+    letter-spacing:.01em;
+  }
+  .phone{
+    width:200px;
+    height:428px;
+    background:#0E2A2E;
+    border-radius:30px;
+    padding:8px;
+    box-shadow:0 14px 30px -14px rgba(14,42,46,.35), 0 2px 6px rgba(14,42,46,.15);
+    position:relative;
+  }
+  .screen{
+    width:100%;
+    height:100%;
+    background:var(--card);
+    border-radius:22px;
+    overflow:hidden;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    font-size:9px;
+  }
+  .notch{
+    position:absolute;
+    top:8px;left:50%;transform:translateX(-50%);
+    width:46px;height:14px;
+    background:#0E2A2E;
+    border-radius:8px;
+    z-index:5;
+  }
+  .statusbar{
+    height:22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 14px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:8px;
+    color:var(--muted);
+    flex-shrink:0;
+  }
+  .topbar{
+    height:34px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:0 12px;
+    flex-shrink:0;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:11px;
+  }
+  .ham{
+    width:16px;height:11px;
+    display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .ham span{height:2px;background:var(--ink);border-radius:2px;display:block;}
+  .content{
+    flex:1;
+    padding:8px 10px 10px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+  }
+  .card{
+    background:#F4F9F9;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:8px 9px;
+  }
+  .card.teal{background:linear-gradient(135deg,var(--teal),var(--teal-deep));color:#fff;border:none;}
+  .card.coral{background:linear-gradient(135deg,var(--coral),#c95a34);color:#fff;border:none;}
+  .card.dark{background:var(--ink);color:#fff;border:none;}
+  .ttl{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:9.5px;
+    margin-bottom:3px;
+  }
+  .sm{font-size:8px;color:var(--muted);line-height:1.4;}
+  .card.teal .sm,.card.coral .sm,.card.dark .sm{color:rgba(255,255,255,.75);}
+  .row{display:flex;gap:6px;}
+  .col{flex:1;}
+  .pill{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:5px 8px;
+    font-size:7.5px;
+    text-align:center;
+    flex:1;
+  }
+  .btn{
+    background:var(--teal);
+    color:#fff;
+    text-align:center;
+    border-radius:10px;
+    padding:8px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:9px;
+  }
+  .btn.ghost{background:transparent;border:1.4px solid var(--teal);color:var(--teal);}
+  .btn.coral{background:var(--coral);}
+  .bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;}
+  .bar i{display:block;height:100%;background:var(--teal);border-radius:4px;}
+  .dots{display:flex;gap:4px;justify-content:center;margin-top:2px;}
+  .dots span{width:5px;height:5px;border-radius:50%;background:var(--line);}
+  .dots span.on{background:var(--teal);}
+  .grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+  .grid7 i{display:block;aspect-ratio:1;border-radius:2px;background:var(--line);}
+  .grid7 i.f1{background:#BEE0D6;}
+  .grid7 i.f2{background:#7FC49B;}
+  .grid7 i.f3{background:var(--green);}
+  .navlist{display:flex;flex-direction:column;gap:5px;}
+  .navitem{display:flex;align-items:center;gap:6px;font-size:8.5px;padding:5px 6px;border-radius:8px;}
+  .navitem.active{background:#E4F0F0;color:var(--teal-deep);font-weight:600;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--sky);flex-shrink:0;}
+  .fab{
+    position:absolute;bottom:10px;right:10px;
+    width:26px;height:26px;border-radius:50%;
+    background:var(--teal);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:600;
+  }
+  .center{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:8px;text-align:center;}
+  .ring{
+    width:74px;height:74px;border-radius:50%;
+    border:7px solid var(--line);
+    border-top-color:var(--teal);
+    border-right-color:var(--teal);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;font-weight:600;
+  }
+  .lockicon{
+    width:44px;height:44px;border-radius:50%;
+    background:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;color:#fff;
+  }
+  .swatchrow{display:flex;gap:5px;}
+  .swatch{width:16px;height:16px;border-radius:5px;flex-shrink:0;}
+  .drawer{
+    position:absolute;inset:0;
+    background:rgba(14,42,46,.45);
+    display:flex;
+  }
+  .drawerpanel{
+    width:78%;height:100%;
+    background:var(--card);
+    padding:14px 10px;
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .avatar{width:24px;height:24px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+  .chart{display:flex;align-items:flex-end;gap:4px;height:44px;}
+  .chart i{flex:1;background:var(--teal);border-radius:3px 3px 0 0;display:block;}
+  .chart i.alt{background:var(--coral);}
+  .faqrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:8.5px;}
+  .drawerfoot{
+    margin-top:auto;
+    padding-top:8px;
+    border-top:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .drawerfoot .ttl{font-size:9px;}
+  .drawerfoot .sm{font-size:7.5px;}
+  .modal{
+    position:absolute;inset:0;
+    background:rgba(14,42,46,.55);
+    display:flex;align-items:center;justify-content:center;
+    padding:16px;
+  }
+  .modalcard{
+    background:var(--card);
+    border-radius:16px;
+    padding:16px 14px;
+    width:100%;
+    text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+  }
+  .emptystate{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;text-align:center;padding:20px;
+  }
+  .emptystate .glyph{font-size:26px;opacity:.5;}
+  .badge{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:7px;letter-spacing:.05em;text-transform:uppercase;
+    padding:2px 6px;border-radius:20px;
+    background:#FDEDE6;color:var(--coral);
+    display:inline-block;
+  }
+  .badge.ok{background:#E4F3EA;color:var(--green);}
+  .appchip{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:6px 8px;border:1px solid var(--line);border-radius:10px;font-size:8.5px;
+  }
+  .checkbox{width:12px;height:12px;border-radius:4px;border:1.4px solid var(--line);flex-shrink:0;}
+  .checkbox.on{background:var(--teal);border-color:var(--teal);}
+  .confetti{
+    font-size:22px;letter-spacing:4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Screen Map · 32 Interfaces</div>
+  <h1>Every screen, at a glance</h1>
+  <p>Material 3, teal/blue theme, rounded cards, hamburger navigation. Tell me the number or name of any screen and I'll revise it.</p>
+</header>
+
+<div class="grid">
+
+  <!-- 1 Splash -->
+  <div class="slot">
+    <div class="slot-label"><b>01 · Splash</b>logo + routing check</div>
+    <div class="phone"><div class="notch"></div><div class="screen" style="background:linear-gradient(160deg,var(--teal-deep),var(--teal));align-items:center;justify-content:center;">
+      <div class="center" style="color:#fff;">
+        <div style="width:52px;height:52px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;">
+          <svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="46" cy="50" r="26" fill="#4FA8B5"/>
+            <path d="M12 62 C 30 78, 70 78, 90 34 C 92 30, 90 26, 86 27 C 66 33, 30 46, 12 56 C 9 58, 9 60, 12 62 Z" fill="none" stroke="#4FA8B5" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="90" cy="30" r="4.5" fill="#4FA8B5"/>
+          </svg>
+        </div>
+        <div class="ttl" style="font-size:12px;">Orbit</div>
+        <div class="sm">loading your session…</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 2 Settings Setup -->
+  <div class="slot">
+    <div class="slot-label"><b>02 · Permission Setup</b>first launch, mandatory checklist</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Set up Orbit</b></div>
+      <div class="content">
+        <div class="sm">Step 3 of 9</div>
+        <div class="bar"><i style="width:33%"></i></div>
+        <div class="card">
+          <div class="ttl">Accessibility Service</div>
+          <div class="sm">Lets Orbit notice scrolling so it can warn you before your limit.</div>
+        </div>
+        <div class="row"><div class="pill" style="background:#FDEDE6;border-color:#F0C9B4;color:var(--coral);">Not granted</div></div>
+        <div class="btn">Enable in Settings</div>
+        <div class="btn ghost">Next</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 3 Profile Setup -->
+  <div class="slot">
+    <div class="slot-label"><b>03 · Profile Setup</b>name, age, grade, photo, quote</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Create your profile</b></div>
+      <div class="content">
+        <div class="center" style="flex:0;padding:6px 0;">
+          <div style="width:48px;height:48px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;">+</div>
+          <div class="sm">Add photo</div>
+        </div>
+        <div class="card"><div class="sm">Name</div><div class="ttl" style="color:var(--line);">Enter your name</div></div>
+        <div class="row">
+          <div class="card col"><div class="sm">Age</div></div>
+          <div class="card col"><div class="sm">Grade</div></div>
+        </div>
+        <div class="card"><div class="sm">Your motivational quote</div></div>
+        <div class="dots"><span class="on"></span><span></span><span></span><span></span></div>
+        <div class="btn">Continue</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 4 Parent Setup -->
+  <div class="slot">
+    <div class="slot-label"><b>04 · Parent Setup</b>guardian account + password</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Parent / Guardian</b></div>
+      <div class="content">
+        <div class="card"><div class="sm">Guardian name</div></div>
+        <div class="card"><div class="sm">Create password</div></div>
+        <div class="card"><div class="sm">Confirm password</div></div>
+        <div class="card" style="background:#FBF3E4;border-color:#EBD9AE;">
+          <div class="ttl" style="color:var(--gold);">Recovery PIN</div>
+          <div class="sm">Used if you forget your password.</div>
+        </div>
+        <div class="btn">Create account</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 5 Home -->
+  <div class="slot">
+    <div class="slot-label"><b>05 · Home</b>scrollable feed, all key info</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Hey, Sanul</b></div>
+      <div class="content" style="gap:6px;">
+        <div class="card teal">
+          <div class="sm" style="opacity:.85;">Today's quote</div>
+          <div class="ttl">"Small steps, every day."</div>
+        </div>
+        <div class="card">
+          <div class="row" style="align-items:center;">
+            <div class="col"><div class="ttl">42m left</div><div class="bar"><i style="width:70%"></i></div></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="pill">🍅 Focus</div>
+          <div class="pill">📝 Notes</div>
+          <div class="pill">🔥 5-day streak</div>
+        </div>
+        <div class="card"><div class="sm">Study today</div><div class="ttl">2h 15m</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 6 Notes List -->
+  <div class="slot">
+    <div class="slot-label"><b>06 · Notes</b>list + search + new note</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Notes</b></div>
+      <div class="content">
+        <div class="card"><div class="sm">🔍 Search notes</div></div>
+        <div class="card"><div class="ttl">Biology revision</div><div class="sm">Photosynthesis, chapter 4…</div></div>
+        <div class="card"><div class="ttl">Essay outline</div><div class="sm">Intro, 3 points, conclusion…</div></div>
+        <div class="card"><div class="ttl">To-ask teacher</div><div class="sm">Clarify homework #3…</div></div>
+      </div>
+      <div class="fab">+</div>
+    </div></div>
+  </div>
+
+  <!-- 7 Note Editor -->
+  <div class="slot">
+    <div class="slot-label"><b>07 · Note Editor</b>write + convert to task</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Edit note</b></div>
+      <div class="content">
+        <div class="card"><div class="ttl">Title</div></div>
+        <div class="card" style="flex:1;"><div class="sm">Start writing…</div></div>
+        <div class="row">
+          <div class="pill">☑ Make this a task</div>
+        </div>
+        <div class="btn">Save</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 8 Pomodoro -->
+  <div class="slot">
+    <div class="slot-label"><b>08 · Pomodoro Timer</b>ring timer, work/break</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Focus timer</b></div>
+      <div class="center">
+        <div class="ring">18:24</div>
+        <div class="sm">Session 2 of 4 · Work</div>
+        <div class="row"><div class="pill">Pause</div><div class="pill">Reset</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 9 Focus Mode -->
+  <div class="slot">
+    <div class="slot-label"><b>09 · Focus Mode</b>full block toggle + duration</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Focus mode</b></div>
+      <div class="content">
+        <div class="card dark"><div class="ttl">Off</div><div class="sm">All scrolling apps unblocked</div></div>
+        <div class="card"><div class="sm">Duration</div><div class="ttl">45 minutes</div></div>
+        <div class="card"><div class="sm">Blocking</div><div class="ttl">Instagram, TikTok, YouTube</div></div>
+        <div class="btn coral">Start Focus Session</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 10 Lock Screen -->
+  <div class="slot">
+    <div class="slot-label"><b>10 · Lock Screen</b>limit reached, minimal</div>
+    <div class="phone"><div class="notch"></div><div class="screen" style="background:var(--ink);">
+      <div class="center" style="color:#fff;">
+        <div class="lockicon">🔒</div>
+        <div class="ttl">Time's up for today</div>
+        <div class="sm">Your scroll limit has been reached.</div>
+        <div class="row" style="margin-top:6px;">
+          <div class="pill" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2);">Open Orbit</div>
+          <div class="pill" style="background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.2);">Go Home</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 11 Bypass -->
+  <div class="slot">
+    <div class="slot-label"><b>11 · Bypass Request</b>password + time picker</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Request more time</b></div>
+      <div class="content">
+        <div class="card"><div class="sm">Today's bypass</div><div class="ttl">1 of 1 available</div></div>
+        <div class="card"><div class="sm">Guardian password</div></div>
+        <div class="card teal">
+          <div class="sm" style="opacity:.85;">Extra time granted</div>
+          <div class="row" style="align-items:center;justify-content:center;gap:10px;">
+            <span style="opacity:.6;">14</span><span class="ttl" style="font-size:14px;">15</span><span style="opacity:.6;">16</span>
+          </div>
+          <div class="sm" style="text-align:center;">minutes</div>
+        </div>
+        <div class="btn">Confirm</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 12 Dashboard -->
+  <div class="slot">
+    <div class="slot-label"><b>12 · Dashboard</b>stats + streak calendar</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Your stats</b></div>
+      <div class="content" style="gap:6px;">
+        <div class="row">
+          <div class="card col"><div class="sm">Study</div><div class="ttl">2h 15m</div></div>
+          <div class="card col"><div class="sm">Bypass used</div><div class="ttl">15m</div></div>
+        </div>
+        <div class="card"><div class="sm">Most used</div><div class="ttl">Instagram · 38m</div></div>
+        <div class="card">
+          <div class="sm" style="margin-bottom:4px;">Streak</div>
+          <div class="grid7">
+            <i class="f2"></i><i class="f2"></i><i class="f3"></i><i></i><i class="f1"></i><i class="f3"></i><i class="f3"></i>
+            <i class="f3"></i><i></i><i class="f2"></i><i class="f3"></i><i class="f3"></i><i class="f1"></i><i class="f3"></i>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 13 Parent Mode -->
+  <div class="slot">
+    <div class="slot-label"><b>13 · Parent Mode</b>password gate + limit editor</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Parental controls</b></div>
+      <div class="content">
+        <div class="card"><div class="sm">Daily scroll limit</div><div class="row" style="align-items:center;"><div class="bar" style="flex:1;"><i style="width:60%"></i></div><span class="sm" style="margin-left:6px;">90m</span></div></div>
+        <div class="card"><div class="sm">Instagram</div><div class="ttl">30m / day</div></div>
+        <div class="card"><div class="sm">TikTok</div><div class="ttl">20m / day</div></div>
+        <div class="card" style="background:#FBF3E4;border-color:#EBD9AE;"><div class="sm" style="color:var(--gold);">Suggested: 75m based on last week</div></div>
+        <div class="btn">Save changes</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 14 Weekly Report -->
+  <div class="slot">
+    <div class="slot-label"><b>14 · Weekly Report</b>parent chart + check-in nudge</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>This week</b></div>
+      <div class="content">
+        <div class="card">
+          <div class="sm" style="margin-bottom:4px;">Scroll vs. study</div>
+          <div class="chart">
+            <i style="height:60%;"></i><i class="alt" style="height:30%;"></i>
+            <i style="height:80%;"></i><i class="alt" style="height:20%;"></i>
+            <i style="height:40%;"></i><i class="alt" style="height:50%;"></i>
+            <i style="height:70%;"></i>
+          </div>
+        </div>
+        <div class="card coral">
+          <div class="ttl">💬 Check in</div>
+          <div class="sm">Ask about their 5-day streak this week.</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 15 Settings Main -->
+  <div class="slot">
+    <div class="slot-label"><b>15 · Settings</b>main list</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Settings</b></div>
+      <div class="content">
+        <div class="navlist">
+          <div class="navitem active"><span class="dot"></span>Account Settings</div>
+          <div class="navitem"><span class="dot"></span>Customization</div>
+          <div class="navitem"><span class="dot"></span>Parental Controls</div>
+          <div class="navitem"><span class="dot"></span>App Manual</div>
+          <div class="navitem"><span class="dot"></span>App Info</div>
+          <div class="navitem"><span class="dot"></span>Devs Info</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 16 Account Settings -->
+  <div class="slot">
+    <div class="slot-label"><b>16 · Account Settings</b>profile + Gmail link</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Account Settings</b></div>
+      <div class="content">
+        <div class="row" style="align-items:center;"><div class="avatar"></div><div class="ttl">Sanul, Grade 11</div></div>
+        <div class="card"><div class="sm">Name</div></div>
+        <div class="card"><div class="sm">Age / Grade</div></div>
+        <div class="card"><div class="sm">Motivational quote</div></div>
+        <div class="card"><div class="sm">Gmail account</div><div class="ttl">Not linked</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 17 Customization -->
+  <div class="slot">
+    <div class="slot-label"><b>17 · Customization</b>theme + font picker</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Customization</b></div>
+      <div class="content">
+        <div class="row">
+          <div class="card col" style="text-align:center;"><div class="sm">Light</div></div>
+          <div class="card col dark" style="text-align:center;"><div class="sm">Dark</div></div>
+        </div>
+        <div class="card">
+          <div class="sm" style="margin-bottom:4px;">Custom colors</div>
+          <div class="swatchrow">
+            <div class="swatch" style="background:var(--teal);"></div>
+            <div class="swatch" style="background:var(--coral);"></div>
+            <div class="swatch" style="background:var(--gold);"></div>
+            <div class="swatch" style="background:var(--green);"></div>
+            <div class="swatch" style="background:var(--blue);"></div>
+          </div>
+        </div>
+        <div class="card"><div class="sm">Font</div><div class="ttl">Space Grotesk</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 18 App Manual -->
+  <div class="slot">
+    <div class="slot-label"><b>18 · App Manual</b>expandable help / FAQ</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Help & Manual</b></div>
+      <div class="content">
+        <div class="card"><div class="sm">🔍 Search the manual</div></div>
+        <div class="faqrow"><span>How limits work</span><span>›</span></div>
+        <div class="faqrow"><span>Using a bypass</span><span>›</span></div>
+        <div class="faqrow"><span>Setting up Parent Mode</span><span>›</span></div>
+        <div class="faqrow"><span>Focus mode</span><span>›</span></div>
+        <div class="faqrow" style="border:none;"><span>Notes & tasks</span><span>›</span></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 19 App Info -->
+  <div class="slot">
+    <div class="slot-label"><b>19 · App Info</b>what it does + version</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>About Orbit</b></div>
+      <div class="content">
+        <div class="card teal">
+          <div class="ttl">Orbit</div>
+          <div class="sm">A mentor app that helps students manage scrolling, build focus habits, and stay accountable with a parent or guardian.</div>
+        </div>
+        <div class="card"><div class="sm">Version</div><div class="ttl">1.0.0</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 20 Devs Info -->
+  <div class="slot">
+    <div class="slot-label"><b>20 · Devs Info</b>credits + GitHub link</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Developers</b></div>
+      <div class="content">
+        <div class="card">
+          <div class="row" style="align-items:center;"><div class="avatar"></div><div class="ttl">Sanul</div></div>
+          <div class="sm">github.com/chill-dude-tyler</div>
+        </div>
+        <div class="btn ghost">View project on GitHub</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 21 Hamburger Drawer -->
+  <div class="slot">
+    <div class="slot-label"><b>21 · Menu Drawer</b>Dashboard → Home → Notes → features → Settings, account pinned bottom-left</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="drawer">
+        <div class="drawerpanel">
+          <div class="navitem active"><span class="dot"></span>Dashboard</div>
+          <div class="navitem"><span class="dot"></span>Home</div>
+          <div class="navitem"><span class="dot"></span>Notes</div>
+          <div class="navitem"><span class="dot"></span>Pomodoro</div>
+          <div class="navitem"><span class="dot"></span>Focus Mode</div>
+          <div class="navitem"><span class="dot"></span>Parent Mode</div>
+          <div class="navitem"><span class="dot"></span>Weekly Report</div>
+          <div class="navitem"><span class="dot"></span>Settings</div>
+          <div class="drawerfoot">
+            <div class="avatar"></div>
+            <div>
+              <div class="ttl">Sanul</div>
+              <div class="sm">View account</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 22 Welcome -->
+  <div class="slot">
+    <div class="slot-label"><b>22 · Welcome</b>intro before permission setup</div>
+    <div class="phone"><div class="notch"></div><div class="screen" style="background:linear-gradient(160deg,var(--teal-deep),var(--teal));">
+      <div class="center" style="color:#fff;padding:0 12px;">
+        <div style="width:52px;height:52px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;">
+          <svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="46" cy="50" r="26" fill="#4FA8B5"/>
+            <path d="M12 62 C 30 78, 70 78, 90 34 C 92 30, 90 26, 86 27 C 66 33, 30 46, 12 56 C 9 58, 9 60, 12 62 Z" fill="none" stroke="#4FA8B5" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="90" cy="30" r="4.5" fill="#4FA8B5"/>
+          </svg>
+        </div>
+        <div class="ttl" style="font-size:13px;">Meet Orbit</div>
+        <div class="sm">A study companion that helps you manage scrolling, stay focused, and build habits — together with a parent or guardian.</div>
+        <div class="row" style="margin-top:8px;width:100%;">
+          <div class="pill" style="background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.25);flex:1;">Get Started</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 23 Password Recovery -->
+  <div class="slot">
+    <div class="slot-label"><b>23 · Password Recovery</b>guardian forgot password</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Reset password</b></div>
+      <div class="content">
+        <div class="card"><div class="sm">Enter recovery PIN</div></div>
+        <div class="card"><div class="sm">Security question</div><div class="ttl">Your child's first pet?</div></div>
+        <div class="card"><div class="sm">Answer</div></div>
+        <div class="card"><div class="sm">New password</div></div>
+        <div class="btn">Reset password</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 24 Notes Empty -->
+  <div class="slot">
+    <div class="slot-label"><b>24 · Notes — Empty State</b>zero notes yet</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Notes</b></div>
+      <div class="emptystate">
+        <div class="glyph">📝</div>
+        <div class="ttl">No notes yet</div>
+        <div class="sm">Capture what you're studying, or turn a thought into a task.</div>
+        <div class="pill" style="margin-top:4px;">+ New note</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 25 Notes Search Results -->
+  <div class="slot">
+    <div class="slot-label"><b>25 · Notes — Search Results</b>filtered list</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Notes</b></div>
+      <div class="content">
+        <div class="card"><div class="sm">🔍 "biology"</div></div>
+        <div class="sm" style="padding:0 2px;">2 results</div>
+        <div class="card"><div class="ttl">Biology revision</div><div class="sm">Photosynthesis, chapter 4…</div></div>
+        <div class="card"><div class="ttl">Biology lab notes</div><div class="sm">Cell structure diagram…</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 26 Dashboard Empty -->
+  <div class="slot">
+    <div class="slot-label"><b>26 · Dashboard — Day One</b>no usage data yet</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Your stats</b></div>
+      <div class="emptystate">
+        <div class="glyph">📊</div>
+        <div class="ttl">Nothing to show yet</div>
+        <div class="sm">Your stats and streak calendar fill in as you use Orbit day to day.</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 27 Theme Color Picker -->
+  <div class="slot">
+    <div class="slot-label"><b>27 · Custom Theme Creator</b>full color picker</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Build your theme</b></div>
+      <div class="content">
+        <div class="card">
+          <div class="sm" style="margin-bottom:4px;">Primary</div>
+          <div class="swatchrow">
+            <div class="swatch" style="background:var(--teal);outline:2px solid var(--ink);"></div>
+            <div class="swatch" style="background:var(--blue);"></div>
+            <div class="swatch" style="background:var(--coral);"></div>
+            <div class="swatch" style="background:var(--gold);"></div>
+            <div class="swatch" style="background:var(--green);"></div>
+            <div class="swatch" style="background:#8A5FB0;"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="sm" style="margin-bottom:4px;">Background</div>
+          <div class="swatchrow">
+            <div class="swatch" style="background:#F4F9F9;border:1px solid var(--line);outline:2px solid var(--ink);"></div>
+            <div class="swatch" style="background:#0E2A2E;"></div>
+            <div class="swatch" style="background:#FBF3E4;"></div>
+          </div>
+        </div>
+        <div class="card"><div class="sm">Live preview</div><div class="ttl">Sample card looks like this</div></div>
+        <div class="btn">Save theme</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 28 Focus Mode App Picker -->
+  <div class="slot">
+    <div class="slot-label"><b>28 · Focus Mode — App Picker</b>choose apps to block</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Block during focus</b></div>
+      <div class="content">
+        <div class="appchip"><span>Instagram</span><div class="checkbox on"></div></div>
+        <div class="appchip"><span>TikTok</span><div class="checkbox on"></div></div>
+        <div class="appchip"><span>YouTube</span><div class="checkbox on"></div></div>
+        <div class="appchip"><span>Snapchat</span><div class="checkbox"></div></div>
+        <div class="appchip"><span>X</span><div class="checkbox"></div></div>
+        <div class="btn" style="margin-top:auto;">Save selection</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 29 Streak Milestone -->
+  <div class="slot">
+    <div class="slot-label"><b>29 · Streak Milestone</b>celebration overlay</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Home</b></div>
+      <div class="modal">
+        <div class="modalcard">
+          <div class="confetti">🎉🔥🎉</div>
+          <div class="ttl" style="font-size:11px;">7-day streak!</div>
+          <div class="sm">You stayed under your limit all week. Keep it up.</div>
+          <div class="pill" style="margin-top:2px;">Nice</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 30 Uninstall Protection -->
+  <div class="slot">
+    <div class="slot-label"><b>30 · Uninstall Protection</b>password required to remove</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Settings</b></div>
+      <div class="modal">
+        <div class="modalcard">
+          <div class="lockicon" style="width:36px;height:36px;font-size:14px;">🔒</div>
+          <div class="ttl" style="font-size:11px;">Guardian password required</div>
+          <div class="sm">Removing Orbit or turning off admin access needs approval.</div>
+          <div class="card" style="width:100%;margin-top:4px;"><div class="sm">Password</div></div>
+          <div class="btn coral" style="width:100%;">Confirm removal</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 31 No Connection -->
+  <div class="slot">
+    <div class="slot-label"><b>31 · No Connection</b>offline state, sync-dependent screens only</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Account Settings</b></div>
+      <div class="emptystate">
+        <div class="glyph">📡</div>
+        <div class="ttl">You're offline</div>
+        <div class="sm">Gmail linking and syncing need internet. Everything else in Orbit still works offline.</div>
+        <div class="badge">Offline</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 32 Easter Egg Popup -->
+  <div class="slot">
+    <div class="slot-label"><b>32 · Easter Egg</b>random motivational surprise</div>
+    <div class="phone"><div class="notch"></div><div class="screen">
+      <div class="statusbar"><span>9:41</span><span>●●●</span></div>
+      <div class="topbar"><div class="ham"><span></span><span></span><span></span></div><b>Home</b></div>
+      <div class="modal">
+        <div class="modalcard" style="background:linear-gradient(135deg,var(--teal),var(--teal-deep));color:#fff;">
+          <div class="confetti">✨</div>
+          <div class="ttl" style="font-size:11px;">Psst — you've got this.</div>
+          <div class="sm" style="opacity:.85;">A tiny reminder for whenever you need one.</div>
+          <div class="pill" style="background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3);margin-top:2px;">Thanks</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+</body>
+</html>
