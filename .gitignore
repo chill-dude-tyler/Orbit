@@ -1,0 +1,11 @@
+# Android SDK / build artifacts — never commit these
+.android-sdk/
+.gradle/
+build/
+*.iml
+.idea/
+local.properties
+captures/
+.cxx/
+*.apk
+*.aab
