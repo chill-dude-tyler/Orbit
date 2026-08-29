@@ -2,12 +2,10 @@
 
 **A screen-time and focus companion built for students, not against them.**
 
-Orbit helps students aged 6–25 build healthier digital habits without feeling
+Orbit helps students aged 11–25 build healthier digital habits without feeling
 policed. Instead of acting as a blunt blocker, it pairs smart scroll-time
 limits with real productivity tools — so students actually want to use it,
 not just tolerate it.
-
-Built for **Spark '26**, hosted by Royal College's Prefects' Council.
 
 ---
 
@@ -67,5 +65,6 @@ place; screen implementations and detection/enforcement logic are in progress.
 
 ## Developer
 
-Built by **chill-dude-tyler**
+Built by **chill-dude-tyler** Real name **Sanul Sandira** at ***Royal College***
+
 GitHub: [github.com/chill-dude-tyler](https://github.com/chill-dude-tyler)
